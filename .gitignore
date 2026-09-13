@@ -3,6 +3,12 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# mkdocs build output
+/site
+
+# uv virtual environment
+.venv/
+
 # C extensions
 *.so
 

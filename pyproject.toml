@@ -1,0 +1,11 @@
+[project]
+name = "docs"
+version = "0.1.0"
+description = "Documentation hub for jcaste05's libraries."
+requires-python = ">=3.11"
+dependencies = [
+    "mkdocs-material",
+]
+
+[tool.uv]
+package = false
