@@ -2466,10 +2466,10 @@ produced by the winning trial.</li>
 <h2 id="0-installation">0. Installation<a class="anchor-link" href="#0-installation">¶</a></h2><p><code>agentic-ml</code> ships with no LLM dependency by default. To run
 <code>TabularRegressionResearcher.research(...)</code> you need two extra packages:</p>
 <ol>
-<li><p>The <code>research</code> extra of <code>agentic-ml</code>, which pulls in the
+<li><p>The <code>research</code> extra of <code>jcaste05-agentic-ml</code>, which pulls in the
 <a href="https://github.com/strands-agents/sdk-python">Strands Agents</a> framework that drives the
 agent loop:</p>
-<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"agentic-ml[research]"</span>
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"jcaste05-agentic-ml[research]"</span>
 </pre></div>
 </li>
 <li><p>A Strands <strong>model provider</strong> extra matching the LLM backend you want to call — Strands does
@@ -2483,7 +2483,7 @@ full list.</p>
 </li>
 </ol>
 <p><code>AgenticModel.load(...)</code> / <code>.predict(...)</code> (production use) never needs either of the two
-packages above: plain <code>pip install agentic-ml</code> is enough.</p>
+packages above: plain <code>pip install jcaste05-agentic-ml</code> is enough.</p>
 <h3 id="api-key">API key<a class="anchor-link" href="#api-key">¶</a></h3><p>You need a valid API key for whichever provider you choose:</p>
 <ul>
 <li><strong>Gemini</strong> (used below): create a key in
@@ -2636,7 +2636,7 @@ print(schema.describe_for_prompt(data))</div>
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2-configure-the-llm-and-run-research">2. Configure the LLM and run research<a class="anchor-link" href="#2-configure-the-llm-and-run-research">¶</a></h2><p><code>TabularRegressionResearcher</code> doesn't hardcode a model provider: you instantiate the Strands
 <code>model</code> object yourself and pass it in, so you can point it at any provider Strands supports.
-This requires the <code>agentic-ml[research]</code> extra plus the matching <code>strands-agents[&lt;provider&gt;]</code>
+This requires the <code>jcaste05-agentic-ml[research]</code> extra plus the matching <code>strands-agents[&lt;provider&gt;]</code>
 extra (e.g. <code>strands-agents[gemini]</code> for Gemini, <code>strands-agents[openai]</code> for OpenAI) and a
 valid API key for that provider — see the installation note above (for Gemini, get one from
 Google AI Studio).</p>
@@ -2924,7 +2924,7 @@ model.save("./artifacts/diabetes_model")</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5-load-in-production-no-llm-dependency">5. Load in "production" (no LLM dependency)<a class="anchor-link" href="#5-load-in-production-no-llm-dependency">¶</a></h2><p><code>AgenticModel.load</code> only needs the base install (<code>agentic-ml</code>, without the <code>research</code> extra):
+<h2 id="5-load-in-production-no-llm-dependency">5. Load in "production" (no LLM dependency)<a class="anchor-link" href="#5-load-in-production-no-llm-dependency">¶</a></h2><p><code>AgenticModel.load</code> only needs the base install (<code>jcaste05-agentic-ml</code>, without the <code>research</code> extra):
 it executes the saved trial's code and restores the fitted state.</p>
 </div>
 </div>
