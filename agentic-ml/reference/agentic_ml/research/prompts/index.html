@@ -1722,8 +1722,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/agentic_ml/research/prompts.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
-<span class="normal">38</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
@@ -1737,7 +1736,8 @@
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
-<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_system_prompt</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">schema_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ResearchConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">52</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_system_prompt</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">schema_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ResearchConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Compose the full system prompt from the base template and task-specific sections."""</span>
     <span class="n">sections</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">_BASE_INSTRUCTIONS</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">primary_metric</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">primary_metric</span><span class="p">),</span>
@@ -1782,8 +1782,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/agentic_ml/research/prompts.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
-<span class="normal">56</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
@@ -1793,10 +1792,23 @@
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_kickoff_prompt</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ResearchConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_kickoff_prompt</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ResearchConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Build the first user message that starts the loop."""</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
         <span class="sa">f</span><span class="s2">"Run up to </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">iterations</span><span class="si">}</span><span class="s2"> experiment iterations to optimize </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">primary_metric</span><span class="si">}</span><span class="s2">."</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="s2">"This is a fresh iteration budget starting now, independent of any previous run: "</span>
+            <span class="s2">"if an earlier tool result in this conversation said the budget was spent and to "</span>
+            <span class="s2">"call finish_research, that no longer applies — you now have "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">iterations</span><span class="si">}</span><span class="s2"> new iterations available."</span>
+        <span class="p">),</span>
     <span class="p">]</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">ideas</span><span class="p">:</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The user specifically wants you to explore these ideas:</span><span class="se">\n</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">ideas</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>

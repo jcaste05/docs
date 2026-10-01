@@ -2529,30 +2529,40 @@ agent sees.</p>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_diabetes</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">agentic_ml.core.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgenticModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">agentic_ml.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetSchema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">agentic_ml.estimators.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularRegressionResearcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agentic_ml.research.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentConfig</span>
 
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"agentic_ml"</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(name)s</span><span class="s2"> </span><span class="si">%(levelname)s</span><span class="s2"> </span><span class="si">%(message)s</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"agentic_ml"</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
 <span class="n">raw</span> <span class="o">=</span> <span class="n">load_diabetes</span><span class="p">(</span><span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"target"</span><span class="p">:</span> <span class="s2">"disease_progression"</span><span class="p">})</span>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1">import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from sklearn.datasets import load_diabetes
 
 from agentic_ml.core.model import AgenticModel
 from agentic_ml.data import DatasetSchema
 from agentic_ml.estimators.regression import TabularRegressionResearcher
+from agentic_ml.research.agent import AgentConfig
 
-logging.basicConfig(level=logging.INFO)
-logging.getLogger("agentic_ml").setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+logging.getLogger("agentic_ml").setLevel(logging.DEBUG)
 
 raw = load_diabetes(as_frame=True)
 data = raw.frame.rename(columns={"target": "disease_progression"})
@@ -2640,9 +2650,16 @@ This requires the <code>jcaste05-agentic-ml[research]</code> extra plus the matc
 extra (e.g. <code>strands-agents[gemini]</code> for Gemini, <code>strands-agents[openai]</code> for OpenAI) and a
 valid API key for that provider — see the installation note above (for Gemini, get one from
 Google AI Studio).</p>
-<p><code>research(...)</code> then drives the agent loop: it proposes a trial, the fixed evaluation pipeline
-scores it (K-Fold + save/load roundtrip check), the result is appended to <code>leaderboard.csv</code>, and
-the agent iterates.</p>
+<p><code>research(...)</code> drives the agent loop: the agent proposes trials via <code>create_trial</code>, the fixed
+evaluation pipeline scores each one (K-Fold + save/load roundtrip check), and the result is
+appended to <code>leaderboard.csv</code>. The agent decides on its own when to stop calling tools, but
+<code>iterations</code> is a <strong>hard cap enforced in Python</strong>: <code>create_trial</code> itself refuses to create more
+than <code>iterations</code> trials, regardless of what the agent asks for.</p>
+<p><strong>Following along live</strong>: with the <code>INFO</code> logging enabled above you'll see, for each trial,
+the trial id, status, metrics and runtime (via <code>agentic_ml.core.engine</code>). Switch to <code>DEBUG</code> to
+also see the exact prompt sent to the agent. A single trial can take a while with small local
+models: generating a full <code>model_py</code> as a tool call is much harder than a plain chat reply, so
+give it a few minutes before assuming it's stuck.</p>
 </div>
 </div>
 </div>
@@ -2665,13 +2682,7 @@ the agent iterates.</p>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-
-<span class="n">load_dotenv</span><span class="p">()</span>
-
-<span class="c1">###</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1">###</span>
 <span class="c1"># Create your LLM instance:</span>
 
 <span class="c1"># from strands.models.openai import OpenAIModel</span>
@@ -2679,12 +2690,39 @@ the agent iterates.</p>
 <span class="c1">#     model_id="gpt-4o",</span>
 <span class="c1">#     client_args={"api_key": os.environ["OPENAI_API_KEY"]},</span>
 <span class="c1"># )</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">strands.models.gemini</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeminiModel</span>
-<span class="n">llm</span> <span class="o">=</span> <span class="n">GeminiModel</span><span class="p">(</span>
+<span class="c1"># from strands.models.gemini import GeminiModel</span>
+<span class="c1"># llm = GeminiModel(</span>
+<span class="c1">#     client_args={</span>
+<span class="c1">#         "api_key": os.environ["GEMINI_API_KEY"],</span>
+<span class="c1">#     },</span>
+<span class="c1">#     model_id="gemini-flash-latest",  # "gemini-flash-latest" - "gemma-4-31b-it"</span>
+<span class="c1"># )</span>
+<span class="c1"># from strands.models.ollama import OllamaModel</span>
+<span class="c1"># llm = OllamaModel(</span>
+<span class="c1">#     host="http://192.168.1.136:31434",  # Replace with your Ollama server host if different</span>
+<span class="c1">#     model_id="qwen3:1.7b",</span>
+<span class="c1">#     keep_alive="5m",</span>
+<span class="c1">#     temperature=0.1,  # lower = more deterministic, fewer malformed tool calls</span>
+<span class="c1">#     max_tokens=1536,  # hard cap so a stuck/rambling generation can't run forever</span>
+<span class="c1">#     options={</span>
+<span class="c1">#         "num_ctx": 8192,</span>
+<span class="c1">#     },</span>
+<span class="c1">#     additional_args={</span>
+<span class="c1">#         "think": False,</span>
+<span class="c1">#     },</span>
+<span class="c1"># )</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strands.models.openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIModel</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="n">OpenAIModel</span><span class="p">(</span>
     <span class="n">client_args</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">"api_key"</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">],</span>
+        <span class="s2">"api_key"</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"GROQ_API_KEY"</span><span class="p">],</span>
+        <span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"https://api.groq.com/openai/v1"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="n">model_id</span><span class="o">=</span><span class="s2">"gemma-4-31b-it"</span><span class="p">,</span>  <span class="c1"># "gemini-flash-latest" - "gemma-4-31b-it"</span>
+    <span class="n">model_id</span><span class="o">=</span><span class="s2">"openai/gpt-oss-120b"</span><span class="p">,</span>  <span class="c1"># "qwen/qwen3.8-27b" - "openai/gpt-oss-120b"</span>
+    <span class="n">context_window_limit</span><span class="o">=</span><span class="mi">6_000</span><span class="p">,</span>  <span class="c1"># match the chosen model's real context window</span>
+    <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"max_tokens"</span><span class="p">:</span> <span class="mi">6_000</span><span class="p">,</span>  <span class="c1"># raise the output cap so a full model_py isn't truncated</span>
+        <span class="c1"># "temperature": 0.1,  # lower = more deterministic, fewer malformed tool calls</span>
+    <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1">###</span>
@@ -2693,18 +2731,12 @@ the agent iterates.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">strands</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
 <span class="n">sanity_check</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"You only need to remember this number: 902718. What is the number you need to "</span>
-    <span class="s2">"remember?"</span>
+    <span class="s2">"remember? Be concise with your answer."</span>
 <span class="p">)</span>
 <span class="n">sanity_agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">sanity_agent</span><span class="p">(</span><span class="n">sanity_check</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-###
+<div class="clipboard-copy-txt" id="cell-3">###
 # Create your LLM instance:
 
 # from strands.models.openai import OpenAIModel
@@ -2712,12 +2744,39 @@ load_dotenv()
 #     model_id="gpt-4o",
 #     client_args={"api_key": os.environ["OPENAI_API_KEY"]},
 # )
-from strands.models.gemini import GeminiModel
-llm = GeminiModel(
+# from strands.models.gemini import GeminiModel
+# llm = GeminiModel(
+#     client_args={
+#         "api_key": os.environ["GEMINI_API_KEY"],
+#     },
+#     model_id="gemini-flash-latest",  # "gemini-flash-latest" - "gemma-4-31b-it"
+# )
+# from strands.models.ollama import OllamaModel
+# llm = OllamaModel(
+#     host="http://192.168.1.136:31434",  # Replace with your Ollama server host if different
+#     model_id="qwen3:1.7b",
+#     keep_alive="5m",
+#     temperature=0.1,  # lower = more deterministic, fewer malformed tool calls
+#     max_tokens=1536,  # hard cap so a stuck/rambling generation can't run forever
+#     options={
+#         "num_ctx": 8192,
+#     },
+#     additional_args={
+#         "think": False,
+#     },
+# )
+from strands.models.openai import OpenAIModel
+llm = OpenAIModel(
     client_args={
-        "api_key": os.environ["GEMINI_API_KEY"],
+        "api_key": os.environ["GROQ_API_KEY"],
+        "base_url": "https://api.groq.com/openai/v1",
     },
-    model_id="gemma-4-31b-it",  # "gemini-flash-latest" - "gemma-4-31b-it"
+    model_id="openai/gpt-oss-120b",  # "qwen/qwen3.8-27b" - "openai/gpt-oss-120b"
+    context_window_limit=6_000,  # match the chosen model's real context window
+    params={
+        "max_tokens": 6_000,  # raise the output cap so a full model_py isn't truncated
+        # "temperature": 0.1,  # lower = more deterministic, fewer malformed tool calls
+    },
 )
 
 ###
@@ -2726,7 +2785,7 @@ llm = GeminiModel(
 from strands import Agent
 sanity_check = (
     "You only need to remember this number: 902718. What is the number you need to "
-    "remember?"
+    "remember? Be concise with your answer."
 )
 sanity_agent = Agent(model=llm)
 response = sanity_agent(sanity_check)</div>
@@ -2790,8 +2849,18 @@ researcher = TabularRegressionResearcher(model=llm)</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1">###</span>
 <span class="c1"># Execute the research agent loop</span>
 
+<span class="c1"># Configuration for small models or free plan rate-limits</span>
+<span class="n">agent_config</span> <span class="o">=</span> <span class="n">AgentConfig</span><span class="p">(</span>
+    <span class="n">pin_first</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">preserve_recent_messages</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># always keep the last 4 messages uncompressed</span>
+    <span class="n">summary_ratio</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>  <span class="c1"># fraction of older messages summarized when compression triggers</span>
+    <span class="n">compression_threshold</span><span class="o">=</span><span class="mf">0.80</span><span class="p">,</span>  <span class="c1"># % of the context window that triggers proactive summarization</span>
+    <span class="n">offload_max_result_tokens</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>  <span class="c1"># tool results larger than this get truncated</span>
+    <span class="n">offload_preview_tokens</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># size of the truncated preview kept in place</span>
+<span class="p">)</span>
+
 <span class="n">prompt_idea</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">"Study linear models with advanced feature engineering"</span>
+    <span class="s2">"Study linear models"</span>
 <span class="p">)</span>
 <span class="n">researcher</span><span class="o">.</span><span class="n">research</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
@@ -2799,16 +2868,27 @@ researcher = TabularRegressionResearcher(model=llm)</div>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">"rmse"</span><span class="p">,</span> <span class="s2">"mae"</span><span class="p">,</span> <span class="s2">"r2"</span><span class="p">],</span>
     <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">ideas</span><span class="o">=</span><span class="n">prompt_idea</span><span class="p">,</span>
-    <span class="n">research_dir</span><span class="o">=</span><span class="s2">"./agentic_ml_runs/diabetes_quick_example"</span><span class="p">,</span>
-    <span class="n">sleep</span><span class="o">=</span><span class="mf">60.0</span><span class="p">,</span>
-    <span class="n">new_session</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">research_dir</span><span class="o">=</span><span class="s2">"./agentic_ml_runs/diabetes_quick_example_2"</span><span class="p">,</span>
+    <span class="n">sleep</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">new_session</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">agent_config</span><span class="o">=</span><span class="n">agent_config</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5">###
 # Execute the research agent loop
 
+# Configuration for small models or free plan rate-limits
+agent_config = AgentConfig(
+    pin_first=1,
+    preserve_recent_messages=1,  # always keep the last 4 messages uncompressed
+    summary_ratio=0.15,  # fraction of older messages summarized when compression triggers
+    compression_threshold=0.80,  # % of the context window that triggers proactive summarization
+    offload_max_result_tokens=500,  # tool results larger than this get truncated
+    offload_preview_tokens=100,  # size of the truncated preview kept in place
+)
+
 prompt_idea = (
-    "Study linear models with advanced feature engineering"
+    "Study linear models"
 )
 researcher.research(
     data,
@@ -2816,9 +2896,10 @@ researcher.research(
     metrics=["rmse", "mae", "r2"],
     iterations=1,
     ideas=prompt_idea,
-    research_dir="./agentic_ml_runs/diabetes_quick_example",
-    sleep=60.0,
-    new_session=True
+    research_dir="./agentic_ml_runs/diabetes_quick_example_2",
+    sleep=0.0,
+    new_session=True,
+    agent_config=agent_config,
 )</div>
 </div>
 </div>

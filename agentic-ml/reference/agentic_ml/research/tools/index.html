@@ -1762,7 +1762,9 @@
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
-<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_create_trial</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">ResearchContext</span><span class="p">):</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_create_trial</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">ResearchContext</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Build a ``create_trial`` tool bound to ``ctx``."""</span>
 
     <span class="nd">@tool</span>
@@ -1775,8 +1777,10 @@
 <span class="sd">            helpers_py: Optional source of a `helpers.py` module imported by `model.py`.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A dict with the trial id, status ("ok"/"failed"), the metrics, the evaluation</span>
-<span class="sd">            runtime, whether the save/load roundtrip passed, and any error message.</span>
+<span class="sd">            A dict with the trial id, status ("ok"/"failed"/"budget_exhausted"), the metrics,</span>
+<span class="sd">            the evaluation runtime, whether the save/load roundtrip passed, any error message,</span>
+<span class="sd">            and how many trials remain (``iterations_remaining``) — with a ``budget_note``</span>
+<span class="sd">            telling you to call `finish_research` once that reaches 0.</span>
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">create_trial_action</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">model_py</span><span class="p">,</span> <span class="n">helpers_py</span><span class="p">)</span>
 
@@ -1810,9 +1814,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/agentic_ml/research/tools/experiment.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
@@ -1830,7 +1832,9 @@
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_read_trial</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">ResearchContext</span><span class="p">):</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_read_trial</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">ResearchContext</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Build a ``read_trial`` tool bound to ``ctx``."""</span>
 
     <span class="nd">@tool</span>
